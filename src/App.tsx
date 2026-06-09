@@ -1,27 +1,21 @@
-import { useState, useEffect } from "react";
-import type { User } from "firebase/auth";
-import { onAuthChange } from "./services/authService";
+import { useEffect } from "react";
+import { useAuthStore } from "./stores/useAuthStore";
 import { Login } from "./components/Login";
 import { TodoList } from "./components/TodoList";
 import "./App.css";
 
 function App() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading, init } = useAuthStore();
 
   useEffect(() => {
-    const unsubscribe = onAuthChange((user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+    init();
+  }, [init]);
 
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
 
-  return user ? <TodoList user={user} /> : <Login />;
+  return user ? <TodoList /> : <Login />;
 }
 
 export default App;

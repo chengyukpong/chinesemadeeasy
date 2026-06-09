@@ -1,25 +1,21 @@
-import { useState, useEffect } from "react";
-import type { User } from "firebase/auth";
-import type { Todo } from "../entities/todo";
-import { addTodo, toggleTodo, deleteTodo, subscribeToTodos } from "../services/todoService";
-import { signOut } from "../services/authService";
+import { useState, useEffect, type SubmitEvent } from "react";
+import { useAuthStore } from "../stores/useAuthStore";
+import { useTodosStore } from "../stores/useTodosStore";
 
-interface Props {
-  user: User;
-}
-
-export function TodoList({ user }: Props) {
-  const [todos, setTodos] = useState<Todo[]>([]);
+export function TodoList() {
+  const { user, signOut } = useAuthStore();
+  const { todos, subscribe, addTodo, toggleTodo, deleteTodo } = useTodosStore();
   const [newTodo, setNewTodo] = useState("");
 
   useEffect(() => {
-    const unsubscribe = subscribeToTodos(user.uid, setTodos);
+    if (!user) return;
+    const unsubscribe = subscribe(user.uid);
     return () => unsubscribe();
-  }, [user.uid]);
+  }, [user, subscribe]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
-    if (!newTodo.trim()) return;
+    if (!newTodo.trim() || !user) return;
     await addTodo(newTodo.trim(), user.uid);
     setNewTodo("");
   };
@@ -29,8 +25,8 @@ export function TodoList({ user }: Props) {
       <header>
         <h1>Todo List</h1>
         <div className="user-info">
-          <img src={user.photoURL || ""} alt="" referrerPolicy="no-referrer" />
-          <span>{user.displayName}</span>
+          <img src={user?.photoURL || ""} alt="" referrerPolicy="no-referrer" />
+          <span>{user?.displayName}</span>
           <button onClick={signOut}>Sign out</button>
         </div>
       </header>
