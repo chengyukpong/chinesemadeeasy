@@ -1,58 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { firestoreMock, authMock, resetMocks } from "../../test/mocks";
+import "../../test/firebaseMocks";
 
-// Mock Firebase modules
-vi.mock("firebase/firestore", () => ({
-  collection: vi.fn().mockReturnValue({ id: "todos", type: "collection" }),
-  addDoc: vi.fn().mockImplementation((collectionRef: { id: string }, data: Record<string, unknown>) => {
-    return firestoreMock.addDoc(collectionRef.id, data);
-  }),
-  deleteDoc: vi.fn().mockImplementation((docRef: { id: string }) => {
-    return firestoreMock.deleteDoc("todos", docRef.id);
-  }),
-  updateDoc: vi.fn().mockImplementation((docRef: { id: string }, data: Record<string, unknown>) => {
-    return firestoreMock.updateDoc("todos", docRef.id, data);
-  }),
-  doc: vi.fn().mockImplementation((_db: unknown, _collection: string, id?: string) => ({
-    id: id || "mock-doc",
-    type: "document"
-  })),
-  onSnapshot: vi.fn(),
-  query: vi.fn(),
-  orderBy: vi.fn(),
-  where: vi.fn(),
-  getDoc: vi.fn().mockImplementation((docRef: { id: string }) => {
-    const todos = firestoreMock.getAll("todos");
-    const todo = todos.find((t) => t.id === docRef.id);
-    return Promise.resolve({
-      exists: () => !!todo,
-      data: () => todo
-    });
-  }),
-  getDocs: vi.fn().mockImplementation(() => {
-    const todos = firestoreMock.getAll("todos");
-    return Promise.resolve({
-      docs: todos.map((todo) => ({
-        id: todo.id,
-        data: () => todo
-      }))
-    });
-  })
-}));
-
-vi.mock("firebase/auth", () => ({
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn().mockImplementation(() => {
-    return authMock.signInWithGoogle();
-  }),
-  signOut: vi.fn().mockImplementation(() => {
-    return authMock.signOut();
-  }),
-  onAuthStateChanged: vi.fn(),
-  createUserWithEmailAndPassword: vi.fn(),
-  signInWithEmailAndPassword: vi.fn()
-}));
-
+// Mock firebase module (path relative to this test file)
 vi.mock("../../services/firebase", () => ({
   db: { type: "firestore" },
   auth: { type: "auth" }
@@ -66,7 +16,7 @@ import {
 } from "../../services/todoService";
 import { signInWithGoogle, signOut } from "../../services/authService";
 
-describe("Core Flow: login → add todos → toggle → delete → logout", () => {
+describe("Core Flow, tier1", () => {
   beforeEach(() => {
     resetMocks();
     vi.clearAllMocks();

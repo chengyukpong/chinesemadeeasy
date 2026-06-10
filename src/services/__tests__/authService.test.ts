@@ -1,25 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { authMock, resetMocks } from "../../test/mocks";
+import "../../test/firebaseMocks";
 
-// Mock Firebase auth module
-vi.mock("firebase/auth", () => ({
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn().mockImplementation(() => {
-    return authMock.signInWithGoogle();
-  }),
-  signOut: vi.fn().mockImplementation(() => {
-    return authMock.signOut();
-  }),
-  onAuthStateChanged: vi.fn().mockImplementation((auth, callback) => {
-    // Simulate initial state
-    callback(authMock.getCurrentUser());
-    return () => {};
-  }),
-  createUserWithEmailAndPassword: vi.fn(),
-  signInWithEmailAndPassword: vi.fn()
-}));
-
-// Mock firebase module
+// Mock firebase module (path relative to this test file)
 vi.mock("../firebase", () => ({
   db: { type: "firestore" },
   auth: { type: "auth" }
@@ -34,7 +17,7 @@ describe("authService", () => {
     vi.clearAllMocks();
   });
 
-  describe("signInWithGoogle", () => {
+  describe("signInWithGoogle, tier1", () => {
     it("returns user object on successful sign in", async () => {
       const user = await signInWithGoogle();
 
@@ -44,7 +27,7 @@ describe("authService", () => {
     });
   });
 
-  describe("signOut", () => {
+  describe("signOut, tier1", () => {
     it("clears current user", async () => {
       await signInWithGoogle();
       expect(authMock.getCurrentUser()).not.toBeNull();
@@ -54,7 +37,7 @@ describe("authService", () => {
     });
   });
 
-  describe("onAuthChange", () => {
+  describe("onAuthChange, tier2", () => {
     it("fires callback with user state", () => {
       const callback = vi.fn();
 

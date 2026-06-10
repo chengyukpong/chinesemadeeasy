@@ -1,54 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { firestoreMock, resetMocks } from "../../test/mocks";
+import "../../test/firebaseMocks";
 
-// Mock Firebase modules
-vi.mock("firebase/firestore", () => ({
-  collection: vi.fn().mockReturnValue({ id: "todos", type: "collection" }),
-  addDoc: vi.fn().mockImplementation((collectionRef: { id: string }, data: Record<string, unknown>) => {
-    return firestoreMock.addDoc(collectionRef.id, data);
-  }),
-  deleteDoc: vi.fn().mockImplementation((docRef: { id: string }) => {
-    return firestoreMock.deleteDoc("todos", docRef.id);
-  }),
-  updateDoc: vi.fn().mockImplementation((docRef: { id: string }, data: Record<string, unknown>) => {
-    return firestoreMock.updateDoc("todos", docRef.id, data);
-  }),
-  doc: vi.fn().mockImplementation((_db: unknown, _collection: string, id?: string) => ({
-    id: id || "mock-doc",
-    type: "document"
-  })),
-  onSnapshot: vi.fn(),
-  query: vi.fn(),
-  orderBy: vi.fn(),
-  where: vi.fn(),
-  getDoc: vi.fn().mockImplementation((docRef: { id: string }) => {
-    const todos = firestoreMock.getAll("todos");
-    const todo = todos.find((t) => t.id === docRef.id);
-    return Promise.resolve({
-      exists: () => !!todo,
-      data: () => todo
-    });
-  }),
-  getDocs: vi.fn().mockImplementation(() => {
-    const todos = firestoreMock.getAll("todos");
-    return Promise.resolve({
-      docs: todos.map((todo) => ({
-        id: todo.id,
-        data: () => todo
-      }))
-    });
-  })
-}));
-
-vi.mock("firebase/auth", () => ({
-  GoogleAuthProvider: vi.fn(),
-  signInWithPopup: vi.fn(),
-  signOut: vi.fn(),
-  onAuthStateChanged: vi.fn(),
-  createUserWithEmailAndPassword: vi.fn(),
-  signInWithEmailAndPassword: vi.fn()
-}));
-
+// Mock firebase module (path relative to this test file)
 vi.mock("../firebase", () => ({
   db: { type: "firestore" },
   auth: { type: "auth" }
@@ -69,7 +23,7 @@ describe("todoService", () => {
     vi.clearAllMocks();
   });
 
-  describe("addTodo", () => {
+  describe("addTodo, tier1", () => {
     it("creates a document with correct fields", async () => {
       const docRef = await addTodo("Buy groceries", TEST_USER_ID);
 
@@ -90,7 +44,7 @@ describe("todoService", () => {
     });
   });
 
-  describe("toggleTodo", () => {
+  describe("toggleTodo, tier2", () => {
     it("flips completed from false to true", async () => {
       const docRef = await addTodo("Task to toggle", TEST_USER_ID);
       await toggleTodo(docRef.id, false);
@@ -109,7 +63,7 @@ describe("todoService", () => {
     });
   });
 
-  describe("deleteTodo", () => {
+  describe("deleteTodo, tier2", () => {
     it("removes the document", async () => {
       const docRef = await addTodo("Task to delete", TEST_USER_ID);
       await deleteTodo(docRef.id);
@@ -128,7 +82,7 @@ describe("todoService", () => {
     });
   });
 
-  describe("subscribeToTodos", () => {
+  describe("subscribeToTodos, tier2", () => {
     it("receives real-time updates when todos are added", async () => {
       const receivedTodos: unknown[][] = [];
 
