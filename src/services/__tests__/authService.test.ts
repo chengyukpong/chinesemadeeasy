@@ -19,7 +19,7 @@ describe("authService", () => {
 
   describe("signInWithGoogle, tier1", () => {
     it("returns user object on successful sign in", async () => {
-      const user = await signInWithGoogle();
+      const user = await signInWithGoogle() as unknown as { uid: string; email: string };
 
       expect(user).toBeDefined();
       expect(user.uid).toBeDefined();

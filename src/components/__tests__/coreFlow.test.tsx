@@ -24,7 +24,7 @@ describe("Core Flow, tier1", () => {
 
   it("full flow: login → add todo1 → add todo2 → delete todo1 → toggle todo2 → logout", async () => {
     // Step 1: Login
-    const user = await signInWithGoogle();
+    const user = await signInWithGoogle() as unknown as { uid: string; email: string };
     expect(user).toBeDefined();
     expect(user.uid).toBeDefined();
     expect(authMock.getCurrentUser()).not.toBeNull();

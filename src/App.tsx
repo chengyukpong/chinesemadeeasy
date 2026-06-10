@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { initFirebase } from "./services/firebase";
 import { useAuthStore } from "./stores/useAuthStore";
 import { Login } from "./components/Login";
 import { TodoList } from "./components/TodoList";
@@ -6,12 +7,16 @@ import "./App.css";
 
 function App() {
   const { user, loading, init } = useAuthStore();
+  const [firebaseReady, setFirebaseReady] = useState(false);
 
   useEffect(() => {
-    init();
+    initFirebase().then(() => {
+      setFirebaseReady(true);
+      init();
+    });
   }, [init]);
 
-  if (loading) {
+  if (!firebaseReady || loading) {
     return <div className="loading">Loading...</div>;
   }
 

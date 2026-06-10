@@ -40,7 +40,8 @@ export const subscribeToTodos = (
       id: doc.id,
       text: doc.data().text,
       completed: doc.data().completed,
-      createdAt: doc.data().createdAt?.toDate() || new Date()
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      userId: doc.data().userId
     }));
     callback(todos);
   });

@@ -1,17 +1,18 @@
-import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeApp, type FirebaseApp } from "firebase/app";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getAuth, type Auth } from "firebase/auth";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAeASm4zKpdgBs2vops4dFzPFDUkf10c0c",
-  authDomain: "chinesemadeeasy-57228.firebaseapp.com",
-  projectId: "chinesemadeeasy-57228",
-  storageBucket: "chinesemadeeasy-57228.firebasestorage.app",
-  messagingSenderId: "1074287828221",
-  appId: "1:1074287828221:web:6d6791d0a85ef3806b3294",
-  measurementId: "G-X6CR1TGG7V"
-};
+let app: FirebaseApp;
+let db: Firestore;
+let auth: Auth;
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+export async function initFirebase() {
+  const res = await fetch("/config.json");
+  const config = await res.json();
+  app = initializeApp(config.firebase);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  return { db, auth };
+}
+
+export { db, auth };

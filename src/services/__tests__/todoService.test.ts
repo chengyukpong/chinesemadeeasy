@@ -84,17 +84,11 @@ describe("todoService", () => {
 
   describe("subscribeToTodos, tier2", () => {
     it("receives real-time updates when todos are added", async () => {
-      const receivedTodos: unknown[][] = [];
-
       // Mock onSnapshot to simulate real-time updates
       const { onSnapshot } = await import("firebase/firestore");
-      vi.mocked(onSnapshot).mockImplementation((_query: unknown, callback: (snapshot: { docs: Array<{ data: () => Record<string, unknown>; id: string }> }) => void) => {
-        // Initial empty state
-        callback({ docs: [] });
+      vi.mocked(onSnapshot).mockImplementation(() => {
         return () => {};
       });
-
-      const unsubscribe = () => {};
 
       // Simulate adding a todo
       await addTodo("Subscribed task", TEST_USER_ID);
@@ -102,8 +96,6 @@ describe("todoService", () => {
       const todos = firestoreMock.getAll("todos");
       expect(todos.length).toBe(1);
       expect(todos[0].text).toBe("Subscribed task");
-
-      unsubscribe();
     });
 
     it("filters by userId - only returns current user's todos", async () => {
