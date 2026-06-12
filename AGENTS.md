@@ -26,6 +26,10 @@ Developer instructions for working with this codebase.
 - **Zustand hooks** — use `useXxxStore()` pattern
 - **Service layer** — never import Firebase directly in components/stores
 
+## Development Practice
+
+**TDD (Test-Driven Development)** — always enabled. See [Testing](specs/TESTING.md) for full process.
+
 ## Commit Conventions
 
 - Use imperative mood ("add feature" not "added feature")
@@ -35,8 +39,9 @@ Developer instructions for working with this codebase.
 ## Workflow
 
 1. Create feature branch
-2. Make changes
-3. Run `npm run build` to verify no errors
-4. Run `npm run test -- -t "tier1"` to verify critical paths
-5. Commit with descriptive message
-6. Push and create PR
+2. **Write tests first (TDD)** — see Development Practice
+3. Implement code to pass tests
+4. Run `npm run build` to verify no errors
+5. Run `npm run test -- -t "tier1"` to verify critical paths
+6. Commit with descriptive message
+7. Push and create PR
