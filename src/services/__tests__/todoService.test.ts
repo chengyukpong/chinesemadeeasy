@@ -5,29 +5,30 @@ import "../../test/firebaseMocks";
 // Mock firebase module (path relative to this test file)
 vi.mock("../firebase", () => ({
   db: { type: "firestore" },
-  auth: { type: "auth" }
+  auth: { type: "auth" },
+  todoService: null,
+  authService: null
 }));
 
 // Import after mocks
-import {
-  addTodo,
-  toggleTodo,
-  deleteTodo,
-} from "../todoService";
+import { TodoService } from "../todoService";
 
 describe("todoService", () => {
+  let todoService: TodoService;
   const TEST_USER_ID = "user-123";
 
   beforeEach(() => {
     resetMocks();
     vi.clearAllMocks();
+    todoService = new TodoService({ type: "firestore" } as never);
   });
 
   describe("addTodo, tier1", () => {
     it("creates a document with correct fields", async () => {
-      const docRef = await addTodo("Buy groceries", TEST_USER_ID);
+      const todoId = await todoService.addTodo("Buy groceries", TEST_USER_ID);
 
-      expect(docRef.id).toBeDefined();
+      expect(todoId).toBeDefined();
+      expect(typeof todoId).toBe("string");
       const todos = firestoreMock.getAll("todos");
       expect(todos.length).toBe(1);
       expect(todos[0].text).toBe("Buy groceries");
@@ -36,8 +37,8 @@ describe("todoService", () => {
     });
 
     it("increments collection count", async () => {
-      await addTodo("Task 1", TEST_USER_ID);
-      await addTodo("Task 2", TEST_USER_ID);
+      await todoService.addTodo("Task 1", TEST_USER_ID);
+      await todoService.addTodo("Task 2", TEST_USER_ID);
 
       const todos = firestoreMock.getAll("todos");
       expect(todos.length).toBe(2);
@@ -46,17 +47,17 @@ describe("todoService", () => {
 
   describe("toggleTodo, tier2", () => {
     it("flips completed from false to true", async () => {
-      const docRef = await addTodo("Task to toggle", TEST_USER_ID);
-      await toggleTodo(docRef.id, false);
+      const todoId = await todoService.addTodo("Task to toggle", TEST_USER_ID);
+      await todoService.toggleTodo(todoId, false);
 
       const todos = firestoreMock.getAll("todos");
       expect(todos[0].completed).toBe(true);
     });
 
     it("flips completed from true to false", async () => {
-      const docRef = await addTodo("Task to toggle back", TEST_USER_ID);
-      await toggleTodo(docRef.id, false);
-      await toggleTodo(docRef.id, true);
+      const todoId = await todoService.addTodo("Task to toggle back", TEST_USER_ID);
+      await todoService.toggleTodo(todoId, false);
+      await todoService.toggleTodo(todoId, true);
 
       const todos = firestoreMock.getAll("todos");
       expect(todos[0].completed).toBe(false);
@@ -65,17 +66,17 @@ describe("todoService", () => {
 
   describe("deleteTodo, tier2", () => {
     it("removes the document", async () => {
-      const docRef = await addTodo("Task to delete", TEST_USER_ID);
-      await deleteTodo(docRef.id);
+      const todoId = await todoService.addTodo("Task to delete", TEST_USER_ID);
+      await todoService.deleteTodo(todoId);
 
       const todos = firestoreMock.getAll("todos");
       expect(todos.length).toBe(0);
     });
 
     it("decrements collection count", async () => {
-      const docRef = await addTodo("Task to count delete", TEST_USER_ID);
+      const todoId = await todoService.addTodo("Task to count delete", TEST_USER_ID);
       const countBefore = firestoreMock.getAll("todos").length;
-      await deleteTodo(docRef.id);
+      await todoService.deleteTodo(todoId);
       const countAfter = firestoreMock.getAll("todos").length;
 
       expect(countAfter).toBe(countBefore - 1);
@@ -91,7 +92,7 @@ describe("todoService", () => {
       });
 
       // Simulate adding a todo
-      await addTodo("Subscribed task", TEST_USER_ID);
+      await todoService.addTodo("Subscribed task", TEST_USER_ID);
 
       const todos = firestoreMock.getAll("todos");
       expect(todos.length).toBe(1);
@@ -100,8 +101,8 @@ describe("todoService", () => {
 
     it("filters by userId - only returns current user's todos", async () => {
       const otherUserId = "other-user-456";
-      await addTodo("My todo", TEST_USER_ID);
-      await addTodo("Other user's todo", otherUserId);
+      await todoService.addTodo("My todo", TEST_USER_ID);
+      await todoService.addTodo("Other user's todo", otherUserId);
 
       const allTodos = firestoreMock.getAll("todos");
       expect(allTodos.length).toBe(2);

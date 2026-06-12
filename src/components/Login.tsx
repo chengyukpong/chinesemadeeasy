@@ -1,6 +1,6 @@
 import { useAuthStore } from "../stores/useAuthStore";
 
-export function Login() {
+export function Login(): React.JSX.Element {
   const { signIn } = useAuthStore();
 
   return (

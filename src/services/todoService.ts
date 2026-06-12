@@ -7,42 +7,57 @@ import {
   onSnapshot,
   query,
   orderBy,
-  where
+  where,
+  type Firestore
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { injectable, inject } from "tsyringe";
 import type { Todo } from "../entities/todo";
+import type { Unsubscribe } from "../entities/types";
 
-export const addTodo = (text: string, userId: string) =>
-  addDoc(collection(db, "todos"), {
-    text,
-    completed: false,
-    createdAt: new Date(),
-    userId
-  });
+@injectable()
+export class TodoService {
+  private db: Firestore;
 
-export const toggleTodo = (id: string, completed: boolean) =>
-  updateDoc(doc(db, "todos", id), { completed: !completed });
+  constructor(@inject("Firestore") db: Firestore) {
+    this.db = db;
+  }
 
-export const deleteTodo = (id: string) =>
-  deleteDoc(doc(db, "todos", id));
+  async addTodo(text: string, userId: string): Promise<string> {
+    const docRef = await addDoc(collection(this.db, "todos"), {
+      text,
+      completed: false,
+      createdAt: new Date(),
+      userId
+    });
+    return docRef.id;
+  }
 
-export const subscribeToTodos = (
-  userId: string,
-  callback: (todos: Todo[]) => void
-) => {
-  const q = query(
-    collection(db, "todos"),
-    where("userId", "==", userId),
-    orderBy("createdAt", "desc")
-  );
-  return onSnapshot(q, (snapshot) => {
-    const todos: Todo[] = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      text: doc.data().text,
-      completed: doc.data().completed,
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      userId: doc.data().userId
-    }));
-    callback(todos);
-  });
-};
+  async toggleTodo(id: string, completed: boolean): Promise<void> {
+    await updateDoc(doc(this.db, "todos", id), { completed: !completed });
+  }
+
+  async deleteTodo(id: string): Promise<void> {
+    await deleteDoc(doc(this.db, "todos", id));
+  }
+
+  subscribeToTodos(
+    userId: string,
+    callback: (todos: Todo[]) => void
+  ): Unsubscribe {
+    const q = query(
+      collection(this.db, "todos"),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc")
+    );
+    return onSnapshot(q, (snapshot) => {
+      const todos: Todo[] = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        text: doc.data().text,
+        completed: doc.data().completed,
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+        userId: doc.data().userId
+      }));
+      callback(todos);
+    });
+  }
+}

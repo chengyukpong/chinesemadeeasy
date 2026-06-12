@@ -2,7 +2,7 @@ import { useState, useEffect, type SubmitEvent } from "react";
 import { useAuthStore } from "../stores/useAuthStore";
 import { useTodosStore } from "../stores/useTodosStore";
 
-export function TodoList() {
+export function TodoList(): React.JSX.Element {
   const { user, signOut } = useAuthStore();
   const { todos, subscribe, addTodo, toggleTodo, deleteTodo } = useTodosStore();
   const [newTodo, setNewTodo] = useState("");
@@ -13,7 +13,7 @@ export function TodoList() {
     return () => unsubscribe();
   }, [user, subscribe]);
 
-  const handleSubmit = async (e: SubmitEvent) => {
+  const handleSubmit = async (e: SubmitEvent): Promise<void> => {
     e.preventDefault();
     if (!newTodo.trim() || !user) return;
     await addTodo(newTodo.trim(), user.uid);

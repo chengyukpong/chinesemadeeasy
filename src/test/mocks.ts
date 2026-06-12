@@ -91,7 +91,14 @@ export const authMock = {
   signInWithGoogle: async () => {
     const mockUser = { uid: "test-user-123", email: "test@example.com" };
     currentUser = mockUser;
-    return mockUser;
+    return {
+      user: {
+        uid: "test-user-123",
+        displayName: "Test User",
+        photoURL: null,
+        email: "test@example.com"
+      }
+    };
   },
 
   signOut: async () => {

@@ -5,34 +5,40 @@ import "../../test/firebaseMocks";
 // Mock firebase module (path relative to this test file)
 vi.mock("../firebase", () => ({
   db: { type: "firestore" },
-  auth: { type: "auth" }
+  auth: { type: "auth" },
+  todoService: null,
+  authService: null
 }));
 
 // Import after mocks
-import { signInWithGoogle, signOut, onAuthChange } from "../authService";
+import { AuthService } from "../authService";
 
 describe("authService", () => {
+  let authService: AuthService;
+
   beforeEach(() => {
     resetMocks();
     vi.clearAllMocks();
+    authService = new AuthService({ type: "auth" } as never);
   });
 
   describe("signInWithGoogle, tier1", () => {
     it("returns user object on successful sign in", async () => {
-      const user = await signInWithGoogle() as unknown as { uid: string; email: string };
+      const user = await authService.signInWithGoogle();
 
       expect(user).toBeDefined();
-      expect(user.uid).toBeDefined();
+      expect(user.uid).toBe("test-user-123");
       expect(user.email).toBe("test@example.com");
+      expect(user.displayName).toBe("Test User");
     });
   });
 
   describe("signOut, tier1", () => {
     it("clears current user", async () => {
-      await signInWithGoogle();
+      await authService.signInWithGoogle();
       expect(authMock.getCurrentUser()).not.toBeNull();
 
-      await signOut();
+      await authService.signOut();
       expect(authMock.getCurrentUser()).toBeNull();
     });
   });
@@ -41,7 +47,7 @@ describe("authService", () => {
     it("fires callback with user state", () => {
       const callback = vi.fn();
 
-      onAuthChange(callback);
+      authService.onAuthChange(callback);
 
       expect(callback).toHaveBeenCalled();
     });

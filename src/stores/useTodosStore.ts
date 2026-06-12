@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Todo } from "../entities/todo";
-import { addTodo as addTodoService, toggleTodo as toggleTodoService, deleteTodo as deleteTodoService, subscribeToTodos } from "../services/todoService";
+import { getTodoService } from "../services/container";
 
 interface TodosState {
   todos: Todo[];
@@ -15,15 +15,15 @@ export const useTodosStore = create<TodosState>((set) => ({
   todos: [],
   setTodos: (todos) => set({ todos }),
   subscribe: (userId) => {
-    return subscribeToTodos(userId, (todos) => set({ todos }));
+    return getTodoService().subscribeToTodos(userId, (todos) => set({ todos }));
   },
   addTodo: async (text, userId) => {
-    await addTodoService(text, userId);
+    await getTodoService().addTodo(text, userId);
   },
   toggleTodo: async (id, completed) => {
-    await toggleTodoService(id, completed);
+    await getTodoService().toggleTodo(id, completed);
   },
   deleteTodo: async (id) => {
-    await deleteTodoService(id);
+    await getTodoService().deleteTodo(id);
   }
 }));

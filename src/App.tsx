@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
-import { initFirebase } from "./services/firebase";
+import { initContainer } from "./services/container";
 import { useAuthStore } from "./stores/useAuthStore";
 import { Login } from "./components/Login";
 import { TodoList } from "./components/TodoList";
 import "./App.css";
 
-function App() {
+function App(): React.JSX.Element {
   const { user, loading, init } = useAuthStore();
   const [firebaseReady, setFirebaseReady] = useState(false);
 
   useEffect(() => {
-    initFirebase().then(() => {
+    initContainer().then(() => {
       setFirebaseReady(true);
       init();
     });

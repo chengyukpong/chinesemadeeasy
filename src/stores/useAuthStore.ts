@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import type { User } from "firebase/auth";
-import { signInWithGoogle, signOut as firebaseSignOut, onAuthChange } from "../services/authService";
+import { getAuthService } from "../services/container";
+import type { TodoUser } from "../entities/user";
 
 interface AuthState {
-  user: User | null;
+  user: TodoUser | null;
   loading: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -14,13 +14,13 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true,
   signIn: async () => {
-    await signInWithGoogle();
+    await getAuthService().signInWithGoogle();
   },
   signOut: async () => {
-    await firebaseSignOut();
+    await getAuthService().signOut();
   },
   init: () => {
-    onAuthChange((user) => {
+    getAuthService().onAuthChange((user) => {
       set({ user, loading: false });
     });
   }
