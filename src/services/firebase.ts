@@ -1,9 +1,9 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getAuth, type Auth } from "firebase/auth";
-import { injectable } from "tsyringe";
+import { singleton } from "tsyringe";
 
-@injectable()
+@singleton()
 export class FirebaseService {
   private app!: FirebaseApp;
   private db!: Firestore;

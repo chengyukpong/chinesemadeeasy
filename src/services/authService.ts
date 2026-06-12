@@ -1,9 +1,9 @@
 import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged, type Auth } from "firebase/auth";
-import { injectable, inject } from "tsyringe";
+import { singleton, inject } from "tsyringe";
 import type { TodoUser } from "../entities/user";
 import type { Unsubscribe } from "../entities/types";
 
-@injectable()
+@singleton()
 export class AuthService {
   private auth: Auth;
   private googleProvider: GoogleAuthProvider;

@@ -10,11 +10,11 @@ import {
   where,
   type Firestore
 } from "firebase/firestore";
-import { injectable, inject } from "tsyringe";
+import { singleton, inject } from "tsyringe";
 import type { Todo } from "../entities/todo";
 import type { Unsubscribe } from "../entities/types";
 
-@injectable()
+@singleton()
 export class TodoService {
   private db: Firestore;
 
